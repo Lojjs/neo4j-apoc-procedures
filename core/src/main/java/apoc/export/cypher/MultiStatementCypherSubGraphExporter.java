@@ -230,7 +230,17 @@ public class MultiStatementCypherSubGraphExporter {
     }
 
     private List<String> exportIndexes() {
-        return db.executeTransactionally("CALL db.indexes()", Collections.emptyMap(), result -> result.stream()
+        // TODO fixme - maybe use core API
+   StreamSupport.stream(graph.getIndexes().spliterator(), false);
+//                .filter(index -> index.isConstraintIndex())
+//                .map(index -> {
+//                    String name = index.getName();
+//                    String label = Iterables.single(index.getLabels()).name();
+//                    Iterable<String> props = index.getPropertyKeys();
+//                    return this.cypherFormat.statementForCreateConstraint(name, label, props, exportConfig.ifNotExists());
+//                })
+
+        return db.executeTransactionally("SHOW INDEXES", Collections.emptyMap(), result -> result.stream()
                 .map(map -> {
                     String indexType = (String) map.get("type");
                     if ("LOOKUP".equals(indexType)) {
@@ -238,7 +248,7 @@ public class MultiStatementCypherSubGraphExporter {
                     }
                     List<String> props = (List<String>) map.get("properties");
                     List<String> tokenNames = (List<String>) map.get("labelsOrTypes");
-                    String name = (String) map.get("name");
+                    String name = "test what breaks";//(String) map.get("name");
                     boolean inGraph = tokensInGraph(tokenNames);
                     if (!inGraph) {
                         return null;
